@@ -5,10 +5,10 @@
 #include <random>
 #include <vector>
 using namespace std;
+const int DEFAULT_BALANCE=100;
 struct client{
     int balance;
-    int id;
-    
+    int id;  
 };
 class bank{
     public:
@@ -30,22 +30,40 @@ class bank{
     };    
 };
 int main(){
+    int result[15][16];
     bank MyBank = bank();
-    vector<client> clientlist;
-    vector<thread> threads;
+    //begin 15 experiments
+    for(int experiment = 0;experiment<15;experiment++){
+        //init balances of clients and the bank
+        MyBank.bankBalance=DEFAULT_BALANCE;
+        vector<client> clientList;
+        vector<thread> threads;
+        //insert new clients into the list
+        for(int i=0;i<15;i++){
+            clientList.push_back({0,i});
+        }
+        // create a thread for each client for trying to witdraw money out of the bank
+        for(int i=0;i<15;i++){
+            threads.push_back(thread(&bank::withdraw,&MyBank,15,ref(clientList.at(i))));
+        }
+        //closing the thread
+        for(auto& t:threads)
+            t.join();  
+        //document the result    
+        for (int i = 0; i < 15; i++)
+        {
+        result[experiment][i]=clientList.at(i).balance;  
+        }
+        result[experiment][15]=MyBank.bankBalance;
+    } 
+    //printing the results
     for(int i=0;i<15;i++){
-        clientlist.push_back({0,i});
+        for(int j=0;j<15;j++)
+        {
+            cout<<result[i][j]<<" ";
+        }
+        cout<<"bank's balance is: "<<result[i][15]<< endl;
+        
     }
-    for(int i=0;i<15;i++)
-    {
-        threads.push_back(thread(&bank::withdraw,&MyBank,15,ref(clientlist.at(i))));
-    }
-    for(auto& t:threads)
-        t.join();
-    for (int i = 0; i < 15; i++)
-    {
-        cout<<"client "<< i << ": has a balance of: "<< clientlist.at(i).balance<<endl;
-    }
-    cout<<" Final bank Balance: "<< MyBank.bankBalance<<endl;
     return 0;
 }
