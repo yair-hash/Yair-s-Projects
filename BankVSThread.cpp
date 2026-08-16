@@ -46,7 +46,7 @@ int main(){
         for(int i=0;i<15;i++){
             threads.push_back(thread(&bank::withdraw,&MyBank,15,ref(clientList.at(i))));
         }
-        //closing the thread
+        //closing the threads
         for(auto& t:threads)
             t.join();  
         //document the result    
